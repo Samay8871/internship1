@@ -1,0 +1,109 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+void createFile(const char *filename) {
+    FILE *file = fopen(filename, "w");
+    if (file == NULL) {
+        perror("Error creating file");
+        exit(1);
+    }
+    printf("File '%s' created successfully.\n", filename);
+    fclose(file);
+}
+
+void writeFile(const char *filename) {
+    FILE *file = fopen(filename, "w");
+    if (file == NULL) {
+        perror("Error opening file for writing");
+        exit(1);
+    }
+
+    printf("Enter data to write to the file (type 'END' to finish):\n");
+    char buffer[256];
+    while (1) {
+        fgets(buffer, sizeof(buffer), stdin);
+        if (strncmp(buffer, "END", 3) == 0 && buffer[3] == '\n') {
+            break;
+        }
+        fprintf(file, "%s", buffer);
+    }
+
+    printf("Data written to file '%s'.\n", filename);
+    fclose(file);
+}
+
+void appendToFile(const char *filename) {
+    FILE *file = fopen(filename, "a");
+    if (file == NULL) {
+        perror("Error opening file for appending");
+        exit(1);
+    }
+
+    printf("Enter data to append to the file (type 'END' to finish):\n");
+    char buffer[256];
+    while (1) {
+        fgets(buffer, sizeof(buffer), stdin);
+        if (strncmp(buffer, "END", 3) == 0 && buffer[3] == '\n') {
+            break;
+        }
+        fprintf(file, "%s", buffer);
+    }
+
+    printf("Data appended to file '%s'.\n", filename);
+    fclose(file);
+}
+
+void readFile(const char *filename) {
+    FILE *file = fopen(filename, "r");
+    if (file == NULL) {
+        perror("Error opening file for reading");
+        exit(1);
+    }
+
+    printf("Contents of file '%s':\n", filename);
+    char buffer[256];
+    while (fgets(buffer, sizeof(buffer), file) != NULL) {
+        printf("%s", buffer);
+    }
+
+    fclose(file);
+}
+
+int main() {
+    const char *filename = "example.txt";
+    int choice;
+
+    do {
+        printf("\nFile Operations Menu:\n");
+        printf("1. Create a file\n");
+        printf("2. Write to a file\n");
+        printf("3. Append to a file\n");
+        printf("4. Read from a file\n");
+        printf("5. Exit\n");
+        printf("Enter your choice: ");
+        scanf("%d", &choice);
+        getchar(); // Consume the newline character left by scanf
+
+        switch (choice) {
+            case 1:
+                createFile(filename);
+                break;
+            case 2:
+                writeFile(filename);
+                break;
+            case 3:
+                appendToFile(filename);
+                break;
+            case 4:
+                readFile(filename);
+                break;
+            case 5:
+                printf("Exiting program.\n");
+                break;
+            default:
+                printf("Invalid choice. Please try again.\n");
+        }
+    } while (choice != 5);
+
+    return 0;
+}
