@@ -1,0 +1,106 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+// Function to compress the input file using Run-Length Encoding (RLE)
+void compressFile(const char *inputFile, const char *outputFile) {
+    FILE *in = fopen(inputFile, "r");
+    FILE *out = fopen(outputFile, "w");
+
+    if (in == NULL || out == NULL) {
+        perror("Error opening file");
+        exit(1);
+    }
+
+    char currentChar, prevChar;
+    int count = 0;
+
+    prevChar = fgetc(in);
+    if (prevChar == EOF) {
+        printf("Input file is empty.\n");
+        fclose(in);
+        fclose(out);
+        return;
+    }
+
+    count = 1;
+    while ((currentChar = fgetc(in)) != EOF) {
+        if (currentChar == prevChar) {
+            count++;
+        } else {
+            fprintf(out, "%c%d", prevChar, count);
+            prevChar = currentChar;
+            count = 1;
+        }
+    }
+    fprintf(out, "%c%d", prevChar, count);
+
+    printf("File compressed successfully to '%s'.\n", outputFile);
+
+    fclose(in);
+    fclose(out);
+}
+
+// Function to decompress a file compressed using RLE
+void decompressFile(const char *inputFile, const char *outputFile) {
+    FILE *in = fopen(inputFile, "r");
+    FILE *out = fopen(outputFile, "w");
+
+    if (in == NULL || out == NULL) {
+        perror("Error opening file");
+        exit(1);
+    }
+
+    char ch;
+    int count;
+
+    while (fscanf(in, "%c%d", &ch, &count) == 2) {
+        for (int i = 0; i < count; i++) {
+            fputc(ch, out);
+        }
+    }
+
+    printf("File decompressed successfully to '%s'.\n", outputFile);
+
+    fclose(in);
+    fclose(out);
+}
+
+int main() {
+    int choice;
+    char inputFile[100], outputFile[100];
+
+    do {
+        printf("\nRun-Length Encoding (RLE) Tool:\n");
+        printf("1. Compress a file\n");
+        printf("2. Decompress a file\n");
+        printf("3. Exit\n");
+        printf("Enter your choice: ");
+        scanf("%d", &choice);
+        getchar(); // Consume newline character
+
+        switch (choice) {
+            case 1:
+                printf("Enter input file name: ");
+                scanf("%s", inputFile);
+                printf("Enter output file name: ");
+                scanf("%s", outputFile);
+                compressFile(inputFile, outputFile);
+                break;
+            case 2:
+                printf("Enter input file name: ");
+                scanf("%s", inputFile);
+                printf("Enter output file name: ");
+                scanf("%s", outputFile);
+                decompressFile(inputFile, outputFile);
+                break;
+            case 3:
+                printf("Exiting program.\n");
+                break;
+            default:
+                printf("Invalid choice. Please try again.\n");
+        }
+    } while (choice != 3);
+
+    return 0;
+}
