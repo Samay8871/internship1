@@ -1,0 +1,110 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <ctype.h>
+
+#define MAX_TOKEN_LENGTH 100
+
+// List of keywords
+const char *keywords[] = {
+    "int", "float", "return", "if", "else", "while", "for", "do", "break", "continue", "char", "void"};
+const int keywordCount = sizeof(keywords) / sizeof(keywords[0]);
+
+// List of operators
+const char operators[] = {'+', '-', '*', '/', '=', '<', '>', '!', '&', '|'};
+const int operatorCount = sizeof(operators) / sizeof(operators[0]);
+
+// Function to check if a string is a keyword
+int isKeyword(const char *word) {
+    for (int i = 0; i < keywordCount; i++) {
+        if (strcmp(word, keywords[i]) == 0) {
+            return 1;
+        }
+    }
+    return 0;
+}
+
+// Function to check if a character is an operator
+int isOperator(char ch) {
+    for (int i = 0; i < operatorCount; i++) {
+        if (ch == operators[i]) {
+            return 1;
+        }
+    }
+    return 0;
+}
+
+// Function to perform lexical analysis
+void lexicalAnalysis(const char *filename) {
+    FILE *file = fopen(filename, "r");
+    if (file == NULL) {
+        perror("Error opening file");
+        exit(1);
+    }
+
+    char ch;
+    char buffer[MAX_TOKEN_LENGTH];
+    int index = 0;
+
+    printf("Lexical Analysis:\n");
+    while ((ch = fgetc(file)) != EOF) {
+        // Handle identifiers and keywords
+        if (isalpha(ch)) {
+            buffer[index++] = ch;
+            while ((ch = fgetc(file)) != EOF && (isalnum(ch) || ch == '_')) {
+                buffer[index++] = ch;
+            }
+            buffer[index] = '\0';
+            index = 0;
+            if (isKeyword(buffer)) {
+                printf("Keyword: %s\n", buffer);
+            } else {
+                printf("Identifier: %s\n", buffer);
+            }
+            ungetc(ch, file); // Return the last read character
+        }
+        // Handle operators
+        else if (isOperator(ch)) {
+            printf("Operator: %c\n", ch);
+        }
+        // Handle numeric literals
+        else if (isdigit(ch)) {
+            buffer[index++] = ch;
+            while ((ch = fgetc(file)) != EOF && isdigit(ch)) {
+                buffer[index++] = ch;
+            }
+            buffer[index] = '\0';
+            index = 0;
+            printf("Numeric Literal: %s\n", buffer);
+            ungetc(ch, file);
+        }
+        // Ignore whitespace and other delimiters
+        else if (isspace(ch) || ch == ',' || ch == ';' || ch == '(' || ch == ')') {
+            continue;
+        }
+        // Handle unrecognized tokens
+        else {
+            printf("Unrecognized token: %c\n", ch);
+        }
+    }
+
+    fclose(file);
+}
+
+int main() {
+    const char *filename = "input.txt";
+
+    printf("Enter the input file name (default: input.txt): ");
+    char userInput[100];
+    if (fgets(userInput, sizeof(userInput), stdin) != NULL) {
+        userInput[strcspn(userInput, "\n")] = 0; // Remove newline
+        if (strlen(userInput) > 0) {
+            filename = userInput;
+        }
+    }
+
+    printf("\nAnalyzing file: %s\n\n", filename);
+    lexicalAnalysis(filename);
+
+    return 0;
+}
